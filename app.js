@@ -1,112 +1,73 @@
 function FormValidate(form) {
-    const _parentItemClass = "form-control";
-    const _errorWrapperClass = "error";
-    const _errorItemClass = "error__item";
+    const _errorWrapperClass = 'error';
+    const _errorItemClass = 'error__item';
+    const _parentItemClass = 'form-control';
     const _elements = form.elements;
-    form.addEventListener("submit", (event) => {
+
+    form.addEventListener('submit', (event) => {
         event.preventDefault();
         this.checkFormElement();
     })
+
     this.checkFormElement = function () {
         for (let i = 0; i < _elements.length; i++) {
             const element = _elements[i];
             const passwordMessage = element.dataset.password;
             if (passwordMessage) {
-                this.validPassword(element,passwordMessage);
+                this.validPassword(passwordMessage);
             }
             const emailMessage = element.dataset.email;
-            if (emailMessage) {
+            if(emailMessage) {
                 this.validEmail(element,emailMessage);
             }
-            const nameRequired = element.dataset.reqname;
-            if(nameRequired) {
-                this.checkRequiredName(element,nameRequired);
+            const requiredMessage = element.dataset.req;
+            if(requiredMessage) {
+                this.required(element,requiredMessage);
             }
-            const emailRequired = element.dataset.reqemail;
-            if(emailRequired) {
-                this.checkRequiredEmail(element,emailRequired);
-            }
-            const passwordRequired = element.dataset.reqpassword;
-            if(passwordRequired) {
-                this.checkRequiredPassword(element,passwordRequired);
-            }
-            const checkBoxRequired = element.dataset.reqcheckbox;
-            if(checkBoxRequired) {
-                this.checkRequiredCheckBox(element,checkBoxRequired);
-            }
-            const userNameMinLength = element.dataset.minname_length;
-            const userNameLengthMessage = element.dataset.minname_message;
-            if(userNameLengthMessage) {
-                this.checkNameLength(element,userNameLengthMessage.replace("N", userNameMinLength));
-            }
-            const passwordMinLength = element.dataset.minpass_length;
-            const passwordLengthMessage = element.dataset.minpass_message;
-            if(passwordLengthMessage) {
-               this.checkPasswordLength(element,passwordLengthMessage.replace("N", passwordMinLength));
+            const minLength = element.dataset.min_length;
+            const minLengthMessage = element.dataset.min_message;
+            if(minLengthMessage) {
+                this.minLength(element,minLengthMessage.replace("N", minLength));
             }
         }
     }
-    this.findInputElement = function(inputWithAttribute) {
-        const inputElement = form.querySelectorAll(inputWithAttribute);
-        this.valueArray = Array.from(inputElement).map(el => el.value);
-    }
-    this.validPassword = function (item,message) {
-        this.findInputElement("input[type=password]");
-        if (this.valueArray[0] !== this.valueArray[1]) {
-            this.errorTemplate(item, message);
+    this.validPassword = function (message) {
+        const allPasswordElement = form.querySelectorAll("input[type='password']");
+        const valueArr = Array.from(allPasswordElement).map(element => element.value);
+
+        if (valueArr[0] !== valueArr[1]) {
+            allPasswordElement.forEach(item => this.errorTemplate(item, message))
         }
     }
     this.validEmail = function (item,message) {
-        this.findInputElement("input[name=email]");
-        const email_regExp = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-        if (!this.valueArray[0].match(email_regExp)  && this.valueArray[0] !== "") {
-           this.errorTemplate(item, message);
-        }
-    }
-    this.checkRequiredName = function (item,message) {
-        this.findInputElement("input[name=username]");
-        if(this.valueArray[0] === ""){
+        const emailElement = form.querySelector("input[name='email']");
+        const emailElValue = emailElement.value.toLowerCase();
+        const emailRegExp =  /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+        if(!emailElValue.match(emailRegExp)) {
             this.errorTemplate(item,message);
         }
     }
-    this.checkRequiredEmail = function (item,message) {
-        this.findInputElement("input[name=email]");
-        if(this.valueArray[0] === ""){
-           this.errorTemplate(item,message);
-        }
-    }
-    this.checkRequiredPassword = function (item,message) {
-        this.findInputElement("input[type=password]");
-        if(this.valueArray[0] === "" && this.valueArray[1] === ""){
-          this.errorTemplate(item,message);
-        }
-    }
-    this.checkRequiredCheckBox = function (item,message) {
-        const inputElement = form.querySelectorAll("input[type=checkbox]");
-        this.valueArray = Array.from(inputElement).map(el => el.checked);
-        if(this.valueArray[0] === false){
+    this.required = function (item,message) {
+        const invalidString = item.value.length === 0;
+        const invalidCheckBox = item.type === "checkbox" && item.checked === false;
+        if(invalidString || invalidCheckBox) {
             this.errorTemplate(item,message);
         }
     }
-    this.checkNameLength = function (item,message) {
-        this.findInputElement("input[name='username']");
-        if(this.valueArray[0].length < 2 && this.valueArray[0] !== "") {
+    this.minLength = function (item,message) {
+        const validLength = item.value.length === item.dataset.min_length;
+        if(!validLength){
             this.errorTemplate(item,message);
         }
-    }
-    this.checkPasswordLength = function (item,message) {
-        this.findInputElement("input[type='password']");
-        if(this.valueArray[0].length < 5 && this.valueArray[1].length <5 && this.valueArray[0] === this.valueArray[1]) {
-            this.errorTemplate(item,message);
-        }
+
     }
     this.errorTemplate = function (element, message) {
         const parent = element.closest(`.${_parentItemClass}`);
         if (!parent.classList.contains(_errorWrapperClass)) {
             parent.classList.add(_errorWrapperClass);
-            parent.insertAdjacentHTML("beforeend", `<small class="${_errorItemClass}">${message}</small>`);
+            parent.insertAdjacentHTML('beforeend', `<small class="${_errorItemClass}">${message}</small>`)
         }
     }
 }
 
-const form = new FormValidate(document.querySelector("#form"));
+const form = new FormValidate(document.querySelector('#form'));
