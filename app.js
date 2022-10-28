@@ -55,7 +55,7 @@ function FormValidate(form) {
         }
     }
     this.minLength = function (item,message) {
-        const validLength = item.value.length === item.dataset.min_length;
+        const validLength = item.value.length >= item.dataset.min_length;
         if(!validLength){
             this.errorTemplate(item,message);
         }
